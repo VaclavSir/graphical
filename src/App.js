@@ -1,21 +1,30 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import { compose, withProps, withState } from 'recompose';
 import './App.css';
+import GraphiQL from 'graphiql';
+import createFetcher from './createFetcher';
+import 'graphiql/graphiql.css';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
-}
+const App = ({ url, setUrl }) =>
+  <div className="App">
+    <input
+      id="urlInputBar"
+      type="url"
+      value={url}
+      onChange={event => setUrl(event.target.value)}
+      placeholder="GraphQL server URL"
+    />
+    <GraphiQL fetcher={createFetcher(url)}/>
+  </div>;
 
-export default App;
+const enhance = compose(
+  withState('url', 'setUrl', window.localStorage.getItem('graphical:url') || ''),
+  withProps(({ setUrl }) => ({
+    setUrl: (url) => {
+      window.localStorage.setItem('graphical:url', url);
+      setUrl(url);
+    }
+  }))
+);
+
+export default enhance(App);
